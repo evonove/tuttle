@@ -5,9 +5,21 @@ from django.db import models
 
 # Create your models here.
 class Provider(models.Model):
-    repository_name = models.TextField(max_length=100)
-    deploy_key = models.TextField(blank=True)
-    title = models.CharField(max_length=100, null=True)
+    name = models.CharField(null=True)
 
-    def __str__(self):
-        return self.repository_name
+
+class User(models.Model):
+    username = models.CharField(max_length=100)
+    token = models.CharField(max_length=255)
+
+
+class Repository(models.Model):
+    name = models.CharField(null=True)
+    user = models.ForeignKey(User)
+
+
+class DeployKey(models.Model):
+    title = models.CharField(null=True, blank=False, max_length=50)
+    key = models.CharField(null=True, blank=False, max_length=255)
+    repository = models.ForeignKey(Repository)
+

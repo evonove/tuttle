@@ -1,26 +1,4 @@
 {% extends "base.html" %}
 {% block content %}
-
-    <form method="post">{% csrf_token %}
-        Username:<input type="text" name="username">
-        Password:<input type="password" name="password">
-        <input type="submit" name="get_repo">
-    </form>
-
     <h2>Repositories List</h2>
-    <form method="post">
-        {% for provider in provider_list %}
-            <li>{{ provider.repository_name }}</li>
-            {% if provider.deploy_key is not None %}
-                Dev key:<input type="text" value="{{ provider.deploy_key }}" name="key">
-                Title:<input type="text" value="{{ provider.title }}">
-            {% else %}
-                <input type="text" name="key">
-                <input type="text" name="title">
-                <input type="hidden" name="repo_name" value="{{ provider.repository_name }}">
-            Title:<input type="text">
-            {% endif %}
-        {% endfor %}
-        <input type="submit" value="ADD" name="add_dev_key">
-    </form>
 {% endblock %}
