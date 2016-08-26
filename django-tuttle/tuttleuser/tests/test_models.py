@@ -5,7 +5,9 @@ from django.contrib.auth import get_user_model
 
 @pytest.mark.django_db
 class TestTuttleUser(object):
-
+    """
+    tests tuttle user
+    """
     def test_users_get_full_name(self):
         user = get_user_model().objects.create(username='provola', email='test@test.it', first_name='aldo',
                                                last_name='bi')
