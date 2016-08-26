@@ -16,5 +16,5 @@ class Command(BaseCommand):
             for repo in user.get_repos():
                 Repository.objects.get_or_create(name=repo.name, user=tuttle)
         except BadCredentialsException:
-            raise CommandError("can't login on github account")
+            raise CommandError("can't login on github account, invalid token")
 
