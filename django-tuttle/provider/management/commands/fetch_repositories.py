@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
-from github import Github
-
-from provider.models import Repository, DeployKey
+from github import Github, BadCredentialsException
 from tuttleuser.models import TuttleUser
+from provider.models import Repository
 
 
 class Command(BaseCommand):
@@ -13,9 +12,9 @@ class Command(BaseCommand):
 
         try:
             login = Github(tuttle.token)
-        except:
-            raise CommandError("can't login")
+            user = login.get_user()
+            for repo in user.get_repos():
+                Repository.objects.get_or_create(name=repo.name, user=tuttle)
+        except BadCredentialsException:
+            raise CommandError("can't login on github account")
 
-        user = login.get_user()
-        for repo in user.get_repos():
-            Repository.objects.get_or_create(name=repo.name, user=tuttle)
