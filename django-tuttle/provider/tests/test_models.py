@@ -17,7 +17,7 @@ class TestProvider(object):
 
     def test_provider_representation(self):
         provider = Provider.objects.create(name='github')
-        assert '%s' % provider
+        assert provider.name == 'github'
 
 
 @pytest.mark.django_db
@@ -27,28 +27,49 @@ class TestRepository(object):
     """
 
     def test_repository_create(self):
-        user = get_user_model().objects.create(username='provola', email='test@gmail.com', first_name='name',
+        user = get_user_model().objects.create(username='user', email='test@gmail.com', first_name='name',
                                                last_name='surname')
-        Repository.objects.create(name='prova', user=user)
+        provider = Provider.objects.create(name='github')
+        Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                  is_private=True, user=user, provider=provider)
         assert Repository.objects.count() == 1
 
     def test_repository_with_no_user(self):
         with pytest.raises(IntegrityError):
-            Repository.objects.create(name='prova')
+            provider = Provider.objects.create(name='github')
+            Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                      is_private=True, provider=provider)
+
+    def test_repository_with_no_provider(self):
+        with pytest.raises(IntegrityError):
+            user = get_user_model().objects.create(username='user', email='test@gmail.com', first_name='name',
+                                                   last_name='surname')
+            Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                      is_private=True, user=user)
+
+    def test_repository_organization(self):
+        user = get_user_model().objects.create(username='user', email='test@gmail.com', first_name='name',
+                                               last_name='surname')
+        provider = Provider.objects.create(name='github')
+        repo = Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                         is_private=True, user=user, provider=provider)
+        assert repo.organization == 'organization'
 
 
 @pytest.mark.django_db
 class TestDeployKey(object):
     """
-    test for deploykey model
+    tests for deploykey model
     """
 
     def test_deploykey_create(self):
-        user = get_user_model().objects.create(username='provola', email='test@gmail.com', first_name='name',
+        user = get_user_model().objects.create(username='user', email='test@gmail.com', first_name='name',
                                                last_name='surname')
-        repo = Repository.objects.create(name='test', user=user)
-        DeployKey.objects.create(title='pippo', key='123456', repository=repo)
+        provider = Provider.objects.create(name='github')
+        repo = Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                         is_private=True, user=user, provider=provider)
+        DeployKey.objects.create(title='deploy key', key='123456', repository=repo)
 
     def test_deploykey_without_user(self):
         with pytest.raises(IntegrityError):
-            DeployKey.objects.create(title='pippo', key='1245')
+            DeployKey.objects.create(title='deploy key', key='1245')

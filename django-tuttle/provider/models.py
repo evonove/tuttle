@@ -17,7 +17,11 @@ class Repository(models.Model):
     Repository model: stores the name of the repository and the user who own the repo
     """
     name = models.CharField(max_length=100)
+    owner = models.CharField(max_length=200)
+    organization = models.CharField(max_length=200, null=True)
+    is_private = models.BooleanField(default=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    provider = models.ForeignKey(Provider)
 
     def __str__(self):
         return self.name
