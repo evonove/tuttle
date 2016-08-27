@@ -4,6 +4,9 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class TuttleUser(AbstractUser):
+    """
+    customized django user model, added token field
+    """
     email = models.EmailField(_('Email address'), max_length=254, unique=True)
     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
     token = models.CharField(null=True, blank=True, max_length=254, unique=True)
