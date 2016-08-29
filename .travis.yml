@@ -1,0 +1,21 @@
+language: python
+
+python:
+  - "3.5"
+
+env:
+  global:
+    - DATABASE_URL="postgres://postgres:@127.0.0.1:5432/tuttle"
+
+services:
+  - docker
+
+before_install:
+  - sudo /etc/init.d/postgresql stop
+  - docker run -d 127.0.0.1:5432
+
+install:
+  - pip install -r requirements/requirements.txt
+
+script:
+  - tox
