@@ -14,7 +14,7 @@ services:
 before_install:
   - docker pull postgres:$PSQL_VERSION
   - sudo /etc/init.d/postgresql stop
-  - docker-compose -d -p 127.0.0.1:5432:5432 postgres:$PSQL_VERSION
+  - docker run -d -p 127.0.0.1:5432:5432 postgres:$PSQL_VERSION
 
 install:
   - pip install tox
