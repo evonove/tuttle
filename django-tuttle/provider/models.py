@@ -32,7 +32,7 @@ class DeployKey(models.Model):
     DeployKey model stores the deploy key parameters of a repository
     """
     title = models.CharField(max_length=255)
-    key = models.CharField(max_length=255)
+    key = models.CharField(max_length=800)
     repository = models.ForeignKey(Repository)
 
     def __str__(self):
