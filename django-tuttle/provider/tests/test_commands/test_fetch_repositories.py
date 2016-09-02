@@ -196,9 +196,6 @@ def test_fetch_repositories_with_invalid_token():
 
 @pytest.mark.django_db
 def test_fetch_repositories_organization_multiple_objects_returned():
-    """
-    Test Error while creating 2 objects with the same params with get_or_create method
-    """
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = mock.MagicMock()
         github_repo_mock = mock.MagicMock(GithubRepo)
@@ -235,9 +232,7 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_without_organization_multiple_objects_returned():
-    """
-    Test Error while creating 2 objects with the same params
-    """
+
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = mock.MagicMock()
         github_repo_mock = mock.MagicMock(GithubRepo)
@@ -272,9 +267,6 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_get_deploykey_multiple_objects_returned():
-    """
-    Test the correct creation of Deploy key object
-    """
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = mock.MagicMock()
         github_repo_mock = mock.MagicMock(GithubRepo)
