@@ -43,7 +43,7 @@ def test_fetch_repositories_with_organization_field():
 @pytest.mark.django_db
 def test_fetch_repositories_with_empty_organization_field():
     """
-    Test the correct creation of Repository object without organization field
+    Test the correct creation of Repository object with empty organization field
     """
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = mock.MagicMock()
@@ -72,7 +72,7 @@ def test_fetch_repositories_with_empty_organization_field():
         repository = Repository.objects.get(name='test')
 
         assert Repository.objects.count() == 1
-        assert repository.organization == ''
+        assert repository.organization is None
 
 
 @pytest.mark.django_db
@@ -117,6 +117,9 @@ def test_fetch_repositories_get_deploykey():
 
 @pytest.mark.django_db
 def test_fetch_repositories_with_no_provider_object():
+    """
+    Test error while launching fetch_repositories command without required argument
+    """
     # creation of arguments needed for execute the django command
     token_arg = '123456'
 
@@ -130,6 +133,9 @@ def test_fetch_repositories_with_no_provider_object():
 
 @pytest.mark.django_db
 def test_fetch_repositories_with_no_user_object():
+    """
+   Test error while launching fetch_repositories command without required argument
+   """
     # creation of arguments needed for execute the django command
     provider_arg = 'test'
 
@@ -143,6 +149,9 @@ def test_fetch_repositories_with_no_user_object():
 
 @pytest.mark.django_db
 def test_fetch_repositories_with_no_args():
+    """
+    Test error while launching fetch_repositories command without required arguments
+    """
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories')
     assert 'Error: the following arguments are required: -t/--token, -p/--provider' in str(ex.value)
@@ -150,6 +159,9 @@ def test_fetch_repositories_with_no_args():
 
 @pytest.mark.django_db
 def test_fetch_repositories_provider_does_not_exist():
+    """
+    Test error while launching fetch_repositories command with argument that doesn't exist
+    """
     # creation of arguments needed for execute the django command
     token_arg = '123456'
 
@@ -163,6 +175,9 @@ def test_fetch_repositories_provider_does_not_exist():
 
 @pytest.mark.django_db
 def test_fetch_repositories_user_does_not_exist():
+    """
+    Test error while launching fetch_repositories command with argument that doesn't exist
+    """
     # creation of arguments needed for execute the django command
     provider_arg = 'test'
 
@@ -177,7 +192,7 @@ def test_fetch_repositories_user_does_not_exist():
 @pytest.mark.django_db
 def test_fetch_repositories_with_invalid_token():
     """
-    Test error failed login
+    Test error login
     """
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         githubMock.side_effect = BadCredentialsException(status='', data='')
@@ -232,7 +247,6 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_without_organization_multiple_objects_returned():
-
     with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = mock.MagicMock()
         github_repo_mock = mock.MagicMock(GithubRepo)
