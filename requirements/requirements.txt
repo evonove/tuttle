@@ -18,9 +18,7 @@ ipdb==0.10.1
 ipython-genutils==0.1.0   # via traitlets
 ipython==5.1.0            # via ipdb
 mccabe==0.5.2             # via flake8
-mock==2.0.0
 newrelic==2.68.0.50
-pbr==1.10.0               # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
 prompt-toolkit==1.0.7     # via ipython
@@ -46,7 +44,7 @@ redis==2.10.5             # via django-redis
 requests==2.11.1          # via pytest-base-url, pytest-selenium
 selenium==2.53.6          # via pytest-selenium
 simplegeneric==0.8.1      # via ipython
-six==1.10.0               # via mock, prompt-toolkit
+six==1.10.0               # via prompt-toolkit
 traitlets==4.2.2          # via ipython
 uwsgi==2.0.13.1
 wcwidth==0.1.7            # via prompt-toolkit
