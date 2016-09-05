@@ -20,7 +20,6 @@ pytest-selenium
 flake8
 coverage
 ipdb
-mock
 
 # logging
 python-logstash

@@ -1,5 +1,4 @@
 import pytest
-import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError
@@ -7,6 +6,7 @@ from django.core.management import call_command
 from github import BadCredentialsException
 from github.Repository import Repository as GithubRepo
 from provider.models import Provider, Repository, DeployKey
+from unittest.mock import MagicMock, patch
 
 
 @pytest.mark.django_db
@@ -14,9 +14,9 @@ def test_fetch_repositories_with_organization_field():
     """
     Test the correct creation of Repository object with organization field
     """
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -26,8 +26,8 @@ def test_fetch_repositories_with_organization_field():
 
         # mock get_repos() method
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
@@ -45,9 +45,9 @@ def test_fetch_repositories_with_empty_organization_field():
     """
     Test the correct creation of Repository object with empty organization field
     """
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -57,8 +57,8 @@ def test_fetch_repositories_with_empty_organization_field():
 
         # mock get_repos() method
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
@@ -80,9 +80,9 @@ def test_fetch_repositories_get_deploykey():
     """
     Test the correct creation of Deploy key object
     """
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -92,9 +92,9 @@ def test_fetch_repositories_get_deploykey():
 
         # mock methods
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
-        github_repo_mock.get_keys = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
+        github_repo_mock.get_keys = MagicMock(return_value=[github_repo_mock])
 
         # assignment parameters for create deploy key object
         github_repo_mock.permissions.admin = True
@@ -194,7 +194,7 @@ def test_fetch_repositories_with_invalid_token():
     """
     Test error login
     """
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         githubMock.side_effect = BadCredentialsException(status='', data='')
         # creation of arguments needed for execute the django command
         token_arg = '123456'
@@ -211,9 +211,9 @@ def test_fetch_repositories_with_invalid_token():
 
 @pytest.mark.django_db
 def test_fetch_repositories_organization_multiple_objects_returned():
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -223,8 +223,8 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
         # mock get_repos() method
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
@@ -247,9 +247,9 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_without_organization_multiple_objects_returned():
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -259,8 +259,8 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
         # mock get_repos() method
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
@@ -281,9 +281,9 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_get_deploykey_multiple_objects_returned():
-    with mock.patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = mock.MagicMock()
-        github_repo_mock = mock.MagicMock(GithubRepo)
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -293,9 +293,9 @@ def test_fetch_repositories_get_deploykey_multiple_objects_returned():
 
         # mock methods
         githubMock = githubMock.return_value
-        githubMock.get_user = mock.MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = mock.MagicMock(return_value=[github_repo_mock])
-        github_repo_mock.get_keys = mock.MagicMock(return_value=[github_repo_mock])
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
+        github_repo_mock.get_keys = MagicMock(return_value=[github_repo_mock])
 
         # assignment parameters for create deploy key object
         github_repo_mock.permissions.admin = True
