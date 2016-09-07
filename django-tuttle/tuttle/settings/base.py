@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'provider.apps.ProviderConfig',
-    'tuttleuser.apps.TuttleuserConfig',
 )
 
 MIDDLEWARE_CLASSES = [
@@ -117,8 +116,6 @@ DEFAULT_FROM_EMAIL = env('DJANGO_FROM_EMAIL')
 EMAIL_BACKEND_DEFAULT = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', EMAIL_BACKEND_DEFAULT)
 
-# custom user
-AUTH_USER_MODEL = 'tuttleuser.TuttleUser'
 
 # logging
 LOGSTASH_HOST = env('LOGSTASH_HOST', '127.0.0.1')

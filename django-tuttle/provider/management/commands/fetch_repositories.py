@@ -2,8 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 from github import Github, BadCredentialsException
-from tuttleuser.models import TuttleUser
-from provider.models import Repository, Provider, DeployKey
+from provider.models import Repository, Provider, DeployKey, Token
 
 logger = logging.getLogger()
 
@@ -19,15 +18,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         token_argument = options['token']
         provider_argument = options['provider']
-
         try:
             # getting user and provider objects
-            tuttle = TuttleUser.objects.get(token=token_argument)
+            tuttle = Token.objects.get(token=token_argument)
             provider = Provider.objects.get(name=provider_argument)
 
-        except TuttleUser.DoesNotExist:
-            logger.error('User objects doesn\'t exist')
-            raise CommandError('User object doesn\'t exist')
+        except Token.DoesNotExist:
+            logger.error('Token objects doesn\'t exist')
+            raise CommandError('Token object doesn\'t exist')
 
         except Provider.DoesNotExist:
             logger.error('Provider objects doesn\'t exist')
@@ -38,7 +36,8 @@ class Command(BaseCommand):
             login = Github(tuttle.token)
             user = login.get_user()
             self.stdout.write('Saving repository info')
-
+            # delete user's deploy keys
+            DeployKey.objects.filter(repository__user=tuttle.user).delete()
             # get repository info of the logged user
             for repo in user.get_repos():
                 params = {
@@ -46,7 +45,7 @@ class Command(BaseCommand):
                     'owner': repo.owner.login,
                     'organization': getattr(repo.organization, 'name', None),
                     'is_private': repo.private,
-                    'user': tuttle,
+                    'user': tuttle.user,
                     'provider': provider,
                 }
                 try:
@@ -66,15 +65,13 @@ class Command(BaseCommand):
                             'key': key.key,
                             'repository': Repository.objects.get(name=repo.name),
                         }
-                        # if key is not null, DeployKey object can be created using the previous params
-                        if key:
-                            try:
-                                DeployKey.objects.get_or_create(**params)
+                        try:
+                            DeployKey.objects.create(**params)
 
-                            except DeployKey.MultipleObjectsReturned:
-                                msg = 'More than 1 Deploykey with this params: %s ' % params
-                                logger.error(msg)
-                                raise CommandError(msg, 'Fix the database')
+                        except DeployKey.MultipleObjectsReturned:
+                            msg = 'More than 1 Deploykey with this params: %s ' % params
+                            logger.error(msg)
+                            raise CommandError(msg, 'Fix the database')
 
         except BadCredentialsException:
             logger.error('Login error on %s' % provider)

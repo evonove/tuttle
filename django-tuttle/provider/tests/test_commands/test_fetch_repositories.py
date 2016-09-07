@@ -5,7 +5,7 @@ from django.core.management import CommandError
 from django.core.management import call_command
 from github import BadCredentialsException
 from github.Repository import Repository as GithubRepo
-from provider.models import Provider, Repository, DeployKey
+from provider.models import Provider, Repository, DeployKey, Token
 from unittest.mock import MagicMock, patch
 
 
@@ -33,9 +33,10 @@ def test_fetch_repositories_with_organization_field():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
-        Provider.objects.create(name=provider_arg)
+        # creation of objects User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
+        provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
         call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
         assert Repository.objects.count() == 1
 
@@ -64,9 +65,10 @@ def test_fetch_repositories_with_empty_organization_field():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
-        Provider.objects.create(name=provider_arg)
+        # creation of object User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
+        provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
         repository = Repository.objects.get(name='test')
@@ -106,8 +108,9 @@ def test_fetch_repositories_get_deploykey():
         provider_arg = 'test'
 
         # creation of objects TuttleUser and Provider
-        get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
-        Provider.objects.create(name=provider_arg)
+        user = get_user_model().objects.create(username='username', email='test@test.it')
+        provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
         call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
         key = DeployKey.objects.get(title='test key')
         assert DeployKey.objects.count() == 1
@@ -123,8 +126,10 @@ def test_fetch_repositories_with_no_provider_object():
     # creation of arguments needed for execute the django command
     token_arg = '123456'
 
-    # creation of object TuttleUser
-    get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
+    # creation of object User, Provider, Token
+    user = get_user_model().objects.create(username='username', email='test@test.it')
+    provider = Provider.objects.create(name='test')
+    Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-t', token_arg)
@@ -132,7 +137,7 @@ def test_fetch_repositories_with_no_provider_object():
 
 
 @pytest.mark.django_db
-def test_fetch_repositories_with_no_user_object():
+def test_fetch_repositories_with_no_token_object():
     """
    Test error while launching fetch_repositories command without required argument
    """
@@ -165,8 +170,10 @@ def test_fetch_repositories_provider_does_not_exist():
     # creation of arguments needed for execute the django command
     token_arg = '123456'
 
-    # creation of object TuttleUser
-    get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
+    # creation of object User, Provider, Token
+    user = get_user_model().objects.create(username='username', email='test@test.it')
+    provider = Provider.objects.create(name='test')
+    Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-t', token_arg, '-p', 'provider test')
@@ -174,7 +181,7 @@ def test_fetch_repositories_provider_does_not_exist():
 
 
 @pytest.mark.django_db
-def test_fetch_repositories_user_does_not_exist():
+def test_fetch_repositories_token_does_not_exist():
     """
     Test error while launching fetch_repositories command with argument that doesn't exist
     """
@@ -183,10 +190,9 @@ def test_fetch_repositories_user_does_not_exist():
 
     # creation of object Provider
     Provider.objects.create(name=provider_arg)
-
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-t', '11111', '-p', provider_arg)
-    assert 'User object doesn\'t exist' in str(ex.value)
+    assert 'Token object doesn\'t exist' in str(ex.value)
 
 
 @pytest.mark.django_db
@@ -200,9 +206,10 @@ def test_fetch_repositories_with_invalid_token():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
-        Provider.objects.create(name=provider_arg)
+        # creation of object User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
+        provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         with pytest.raises(CommandError) as ex:
             call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
@@ -230,9 +237,10 @@ def test_fetch_repositories_organization_multiple_objects_returned():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        user = get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
+        # creation of object User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
         provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         Repository.objects.create(name='test', owner='user test', organization='test organization',
                                   is_private=False, user=user, provider=provider)
@@ -266,9 +274,10 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        user = get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
+        # creation of object User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
         provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         Repository.objects.create(name='test', owner='user test', is_private=False, user=user, provider=provider)
 
@@ -280,7 +289,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 
 @pytest.mark.django_db
-def test_fetch_repositories_get_deploykey_multiple_objects_returned():
+def test_fetch_repositories_cleans_deploy_keys():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -306,15 +315,15 @@ def test_fetch_repositories_get_deploykey_multiple_objects_returned():
         token_arg = '123456'
         provider_arg = 'test'
 
-        # creation of objects TuttleUser and Provider
-        user = get_user_model().objects.create(username='username', email='test@test.it', token=token_arg)
+        # creation of object User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
         provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         repository = Repository.objects.create(name='test', owner='user test', is_private=False,
                                                user=user, provider=provider)
         DeployKey.objects.create(title='test key', key='123456', repository=repository)
         DeployKey.objects.create(title='test key', key='123456', repository=repository)
+        call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
 
-        with pytest.raises(CommandError) as ex:
-            call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
-        assert 'Fix the database' in str(ex.value)
+        assert DeployKey.objects.count() == 1

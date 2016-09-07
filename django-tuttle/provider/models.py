@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -34,6 +35,19 @@ class DeployKey(models.Model):
     title = models.CharField(max_length=255)
     key = models.CharField(max_length=800)
     repository = models.ForeignKey(Repository)
+
+    def __str__(self):
+        return self.title
+
+
+class Token(models.Model):
+    """
+    Token model: stores the personal access token given by github or bitbucket
+    """
+    title = models.CharField(max_length=254)
+    token = models.CharField(max_length=800, unique=True)
+    provider = models.ForeignKey(Provider)
+    user = models.ForeignKey(User)
 
     def __str__(self):
         return self.title
