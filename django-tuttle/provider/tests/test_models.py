@@ -67,7 +67,7 @@ class TestDeployKey(object):
                                                last_name='surname')
         provider = Provider.objects.create(name='github')
         repo = Repository.objects.create(name='repository test', owner='user test', organization='organization',
-                                         is_private=True, user=user, provider=provider)
+                                         is_private=True, is_user_admin=True, user=user, provider=provider)
         DeployKey.objects.create(title='deploy key', key='123456', repository=repo)
 
     def test_deploykey_without_user(self):

@@ -45,6 +45,7 @@ class Command(BaseCommand):
                     'owner': repo.owner.login,
                     'organization': getattr(repo.organization, 'name', None),
                     'is_private': repo.private,
+                    'is_user_admin': repo.permissions.admin,
                     'user': tuttle.user,
                     'provider': provider,
                 }

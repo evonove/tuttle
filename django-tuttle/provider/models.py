@@ -21,6 +21,7 @@ class Repository(models.Model):
     owner = models.CharField(max_length=200)
     organization = models.CharField(max_length=200, blank=True, null=True)
     is_private = models.BooleanField(default=False)
+    is_user_admin = models.BooleanField(default=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     provider = models.ForeignKey(Provider)
 

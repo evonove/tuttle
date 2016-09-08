@@ -23,6 +23,7 @@ def test_fetch_repositories_with_organization_field():
         github_repo_mock.organization.name = 'test-organization'
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -55,6 +56,7 @@ def test_fetch_repositories_with_empty_organization_field():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -91,6 +93,8 @@ def test_fetch_repositories_get_deploykey():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
+        github_repo_mock.user_admin = True
 
         # mock methods
         githubMock = githubMock.return_value
@@ -227,6 +231,7 @@ def test_fetch_repositories_organization_multiple_objects_returned():
         github_repo_mock.organization.name = 'test organization'
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -264,6 +269,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -299,6 +305,7 @@ def test_fetch_repositories_cleans_deploy_keys():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
+        github_repo_mock.user_admin = True
 
         # mock methods
         githubMock = githubMock.return_value
