@@ -23,7 +23,7 @@ def test_fetch_repositories_with_organization_field():
         github_repo_mock.organization.name = 'test-organization'
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -56,7 +56,7 @@ def test_fetch_repositories_with_empty_organization_field():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -93,8 +93,7 @@ def test_fetch_repositories_get_deploykey():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock methods
         githubMock = githubMock.return_value
@@ -231,7 +230,7 @@ def test_fetch_repositories_organization_multiple_objects_returned():
         github_repo_mock.organization.name = 'test organization'
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -248,10 +247,10 @@ def test_fetch_repositories_organization_multiple_objects_returned():
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         Repository.objects.create(name='test', owner='user test', organization='test organization',
-                                  is_private=False, user=user, provider=provider)
+                                  is_private=False, is_user_admin=True, user=user, provider=provider)
 
         Repository.objects.create(name='test', owner='user test', organization='test organization',
-                                  is_private=False, user=user, provider=provider)
+                                  is_private=False, is_user_admin=True, user=user, provider=provider)
 
         with pytest.raises(CommandError) as ex:
             call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
@@ -269,7 +268,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock get_repos() method
         githubMock = githubMock.return_value
@@ -285,9 +284,11 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
         provider = Provider.objects.create(name=provider_arg)
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
-        Repository.objects.create(name='test', owner='user test', is_private=False, user=user, provider=provider)
+        Repository.objects.create(name='test', owner='user test', is_private=False, is_user_admin=True,
+                                  user=user, provider=provider)
 
-        Repository.objects.create(name='test', owner='user test', is_private=False, user=user, provider=provider)
+        Repository.objects.create(name='test', owner='user test', is_private=False, is_user_admin=True,
+                                  user=user, provider=provider)
 
         with pytest.raises(CommandError) as ex:
             call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
@@ -305,7 +306,7 @@ def test_fetch_repositories_cleans_deploy_keys():
         github_repo_mock.organization = None
         github_repo_mock.owner.login = 'user test'
         github_repo_mock.private = False
-        github_repo_mock.user_admin = True
+        github_repo_mock.permissions.admin = True
 
         # mock methods
         githubMock = githubMock.return_value
@@ -328,7 +329,7 @@ def test_fetch_repositories_cleans_deploy_keys():
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
         repository = Repository.objects.create(name='test', owner='user test', is_private=False,
-                                               user=user, provider=provider)
+                                               is_user_admin=True, user=user, provider=provider)
         DeployKey.objects.create(title='test key', key='123456', repository=repository)
         DeployKey.objects.create(title='test key', key='123456', repository=repository)
         call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
