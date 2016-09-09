@@ -1,0 +1,12 @@
+[run]
+source = django-tuttle
+omit =
+    */migrations/*
+    */tests/*
+    django-tuttle/manage.py
+    django-tuttle/tuttle/wsgi.py
+    django-tuttle/tuttle/settings/production.py
+
+[report]
+skip_covered = True
+show_missing = True
