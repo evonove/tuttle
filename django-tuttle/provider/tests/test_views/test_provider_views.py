@@ -20,7 +20,6 @@ def test_deploykey_list_view_without_login(client):
 @pytest.mark.django_db
 def test_repository_list_view(client):
     get_user_model().objects.create_user(username='username', email='test@test.it', password='123456')
-    # client.post('/accounts/login/', {'username': 'username', 'password': '123456'})
     client.login(username='username', password='123456')
     response = client.get(reverse('repo_list'))
     assert response.status_code == 200

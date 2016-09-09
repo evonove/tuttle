@@ -4,7 +4,6 @@ from provider.models import DeployKey, Repository
 
 
 class DeployKeyListView(LoginRequiredMixin, ListView):
-    login_url = '/accounts/login/'
     model = DeployKey
     template_name = 'templates/deploykey_list.html'
 
@@ -13,7 +12,6 @@ class DeployKeyListView(LoginRequiredMixin, ListView):
 
 
 class RepositoryListView(LoginRequiredMixin, ListView):
-    login_url = '/accounts/login/'
     model = Repository
     template_name = 'templates/repository_list.html'
 
