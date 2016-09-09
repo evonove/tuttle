@@ -3,6 +3,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError
 from django.core.management import call_command
+from django.db import IntegrityError
 from github import BadCredentialsException
 from github.Repository import Repository as GithubRepo
 from provider.models import Provider, Repository, DeployKey, Token
@@ -296,7 +297,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 
 @pytest.mark.django_db
-def test_fetch_repositories_cleans_deploy_keys():
+def test_fetch_repositories_deploy_keys_exception():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -328,10 +329,9 @@ def test_fetch_repositories_cleans_deploy_keys():
         provider = Provider.objects.create(name=provider_arg)
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
 
-        repository = Repository.objects.create(name='test', owner='user test', is_private=False,
-                                               is_user_admin=True, user=user, provider=provider)
-        DeployKey.objects.create(title='test key', key='123456', repository=repository)
-        DeployKey.objects.create(title='test key', key='123456', repository=repository)
-        call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
-
-        assert DeployKey.objects.count() == 1
+        Repository.objects.create(name='test', owner='user test', is_private=False,
+                                  is_user_admin=True, user=user, provider=provider)
+        with pytest.raises(IntegrityError) as ex:
+            DeployKey.objects.create(title='test key', key='123456')
+            call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
+        assert ex.match(r'.*null value in column "repository_id"')
