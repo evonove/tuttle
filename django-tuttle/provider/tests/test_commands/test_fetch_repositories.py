@@ -19,6 +19,9 @@ def test_fetch_repositories_with_organization_field():
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
 
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': 'repo'}
+
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
         github_repo_mock.organization.name = 'test-organization'
@@ -51,6 +54,9 @@ def test_fetch_repositories_with_empty_organization_field():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
+
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': 'repo'}
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -88,6 +94,9 @@ def test_fetch_repositories_get_deploykey():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
+
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': 'repo'}
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -226,6 +235,9 @@ def test_fetch_repositories_organization_multiple_objects_returned():
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
 
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': 'repo'}
+
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
         github_repo_mock.organization.name = 'test organization'
@@ -263,6 +275,9 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
+
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': 'repo'}
 
         # assignment parameters for the creation of Repository object
         github_repo_mock.name = 'test'
@@ -335,3 +350,37 @@ def test_fetch_repositories_deploy_keys_exception():
             DeployKey.objects.create(title='test key', key='123456')
             call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
         assert ex.match(r'.*null value in column "repository_id"')
+
+
+@pytest.mark.django_db
+def test_fetch_repositories_token_no_repo_scope():
+    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
+        github_user_mock = MagicMock()
+        github_repo_mock = MagicMock(GithubRepo)
+
+        # assignement scope to user's token
+        github_user_mock.raw_headers = {'x-oauth-scopes': ''}
+
+        # assignment parameters for the creation of Repository object
+        github_repo_mock.name = 'test'
+        github_repo_mock.organization.name = 'test-organization'
+        github_repo_mock.owner.login = 'user test'
+        github_repo_mock.private = False
+        github_repo_mock.permissions.admin = True
+
+        # mock get_repos() method
+        githubMock = githubMock.return_value
+        githubMock.get_user = MagicMock(return_value=github_user_mock)
+        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
+
+        # creation of arguments needed for execute the django command
+        token_arg = '123456'
+        provider_arg = 'test'
+
+        # creation of objects User, Provider, Token
+        user = get_user_model().objects.create(username='username', email='test@test.it')
+        provider = Provider.objects.create(name=provider_arg)
+        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
+        with pytest.raises(CommandError) as ex:
+            call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
+        assert 'Your token has not REPO scope' in str(ex.value)
