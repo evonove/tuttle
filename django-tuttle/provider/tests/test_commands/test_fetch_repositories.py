@@ -3,7 +3,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.db import IntegrityError
 from github import BadCredentialsException
 from github.Repository import Repository as GithubRepo
 from provider.models import Provider, Repository, DeployKey, Token
@@ -312,48 +311,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 
 @pytest.mark.django_db
-def test_fetch_repositories_deploy_keys_exception():
-    with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
-        github_user_mock = MagicMock()
-        github_repo_mock = MagicMock(GithubRepo)
-
-        # assignment parameters for the creation of Repository object
-        github_repo_mock.name = 'test'
-        github_repo_mock.organization = None
-        github_repo_mock.owner.login = 'user test'
-        github_repo_mock.private = False
-        github_repo_mock.permissions.admin = True
-
-        # mock methods
-        githubMock = githubMock.return_value
-        githubMock.get_user = MagicMock(return_value=github_user_mock)
-        github_user_mock.get_repos = MagicMock(return_value=[github_repo_mock])
-        github_repo_mock.get_keys = MagicMock(return_value=[github_repo_mock])
-
-        # assignment parameters for create deploy key object
-        github_repo_mock.permissions.admin = True
-        github_repo_mock.title = 'test key'
-        github_repo_mock.key = '123456'
-
-        # creation of arguments needed for execute the django command
-        token_arg = '123456'
-        provider_arg = 'test'
-
-        # creation of object User, Provider, Token
-        user = get_user_model().objects.create(username='username', email='test@test.it')
-        provider = Provider.objects.create(name=provider_arg)
-        Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
-
-        Repository.objects.create(name='test', owner='user test', is_private=False,
-                                  is_user_admin=True, user=user, provider=provider)
-        with pytest.raises(IntegrityError) as ex:
-            DeployKey.objects.create(title='test key', key='123456')
-            call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
-        assert ex.match(r'.*null value in column "repository_id"')
-
-
-@pytest.mark.django_db
-def test_fetch_repositories_token_no_repo_scope():
+def test_fetch_repositories_token_no_scope():
     with patch('provider.management.commands.fetch_repositories.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)

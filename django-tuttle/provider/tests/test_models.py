@@ -18,6 +18,7 @@ class TestProvider(object):
     def test_provider_representation(self):
         provider = Provider.objects.create(name='github')
         assert provider.name == 'github'
+        assert str(provider), provider.name
 
 
 @pytest.mark.django_db
@@ -30,9 +31,10 @@ class TestRepository(object):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',
                                                last_name='surname')
         provider = Provider.objects.create(name='github')
-        Repository.objects.create(name='repository test', owner='user test', organization='organization',
-                                  is_private=True, user=user, provider=provider)
+        repository = Repository.objects.create(name='repository test', owner='user test', organization='organization',
+                                               is_private=True, user=user, provider=provider)
         assert Repository.objects.count() == 1
+        assert str(repository), repository.name
 
     def test_repository_with_no_user(self):
         with pytest.raises(IntegrityError):
@@ -68,7 +70,9 @@ class TestDeployKey(object):
         provider = Provider.objects.create(name='github')
         repo = Repository.objects.create(name='repository test', owner='user test', organization='organization',
                                          is_private=True, is_user_admin=True, user=user, provider=provider)
-        DeployKey.objects.create(title='deploy key', key='123456', repository=repo)
+        key = DeployKey.objects.create(title='deploy key', key='123456', repository=repo)
+        assert DeployKey.objects.count() == 1
+        assert str(key), key.title
 
     def test_deploykey_without_user(self):
         with pytest.raises(IntegrityError):
@@ -84,8 +88,9 @@ class TestToken(object):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',
                                                last_name='surname')
         provider = Provider.objects.create(name='github')
-        Token.objects.create(title='test', token='123456', provider=provider, user=user)
+        token = Token.objects.create(title='test', token='123456', provider=provider, user=user)
         assert Token.objects.count() == 1
+        assert str(token), token.title
 
     def test_token_without_provider(self):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',

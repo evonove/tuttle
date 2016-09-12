@@ -1,7 +1,6 @@
 import logging
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db import IntegrityError
 from github import Github, BadCredentialsException
 from provider.models import Repository, Provider, DeployKey, Token
 
@@ -62,7 +61,6 @@ class Command(BaseCommand):
                         msg = 'More than 1 Repository with this params: %s ' % params
                         logger.error(msg)
                         raise CommandError(msg, 'Fix the database')
-
                     # user must be admin of his repository for get the deploy keys
                     if repo.permissions.admin:
                         for key in repo.get_keys():
@@ -71,14 +69,7 @@ class Command(BaseCommand):
                                 'key': key.key,
                                 'repository': Repository.objects.get(name=repo.name),
                             }
-                            try:
-                                DeployKey.objects.create(**params)
-
-                            except IntegrityError:
-                                msg = 'Error during the object creation'
-                                logger.error(msg)
-                                raise CommandError(msg)
-
+                            DeployKey.objects.create(**params)
             else:
                 raise CommandError('Your token has not REPO scope')
 
