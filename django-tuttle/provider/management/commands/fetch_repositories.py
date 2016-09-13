@@ -38,40 +38,40 @@ class Command(BaseCommand):
 
             # check token scopes
             scope_list = user.raw_headers['x-oauth-scopes']
-            if 'repo' in scope_list:
-                self.stdout.write('Saving repository info')
-                # delete user's deploy keys
-                DeployKey.objects.filter(repository__user=token.user).delete()
-                # get repository info of the logged user
-                for repo in user.get_repos():
-                    params = {
-                        'name': repo.name,
-                        'owner': repo.owner.login,
-                        'organization': getattr(repo.organization, 'name', None),
-                        'is_private': repo.private,
-                        'is_user_admin': repo.permissions.admin,
-                        'user': token.user,
-                        'provider': provider,
-                    }
-                    try:
-                        Repository.objects.get_or_create(**params)
-                        self.stdout.write(repo.name)
+            if 'repo' not in scope_list:
+                raise CommandError('Your token does not have the \'repo\' scope')
 
-                    except Repository.MultipleObjectsReturned:
-                        msg = 'More than 1 Repository with this params: %s ' % params
-                        logger.error(msg)
-                        raise CommandError(msg, 'Fix the database')
-                    # user must be admin of his repository for get the deploy keys
-                    if repo.permissions.admin:
-                        for key in repo.get_keys():
-                            params = {
-                                'title': key.title,
-                                'key': key.key,
-                                'repository': Repository.objects.get(name=repo.name),
-                            }
-                            DeployKey.objects.create(**params)
-            else:
-                raise CommandError('Your token has not REPO scope')
+            self.stdout.write('Saving repository info')
+            # delete user's deploy keys
+            DeployKey.objects.filter(repository__user=token.user).delete()
+            # get repository info of the logged user
+            for repo in user.get_repos():
+                params = {
+                    'name': repo.name,
+                    'owner': repo.owner.login,
+                    'organization': getattr(repo.organization, 'name', None),
+                    'is_private': repo.private,
+                    'is_user_admin': repo.permissions.admin,
+                    'user': token.user,
+                    'provider': provider,
+                }
+                try:
+                    Repository.objects.get_or_create(**params)
+                    self.stdout.write(repo.name)
+
+                except Repository.MultipleObjectsReturned:
+                    msg = 'More than 1 Repository with this params: %s ' % params
+                    logger.error(msg)
+                    raise CommandError(msg, 'Fix the database')
+                # user must be admin of his repository for get the deploy keys
+                if repo.permissions.admin:
+                    for key in repo.get_keys():
+                        params = {
+                            'title': key.title,
+                            'key': key.key,
+                            'repository': Repository.objects.get(name=repo.name),
+                        }
+                        DeployKey.objects.create(**params)
 
         except BadCredentialsException:
             logger.error('Login error on %s' % provider)

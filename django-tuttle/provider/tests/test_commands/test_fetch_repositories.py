@@ -341,4 +341,4 @@ def test_fetch_repositories_token_no_scope():
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
         with pytest.raises(CommandError) as ex:
             call_command('fetch_repositories', '-t', token_arg, '-p', provider_arg)
-        assert 'Your token has not REPO scope' in str(ex.value)
+        assert 'Your token does not have the \'repo\' scope' in str(ex.value)
