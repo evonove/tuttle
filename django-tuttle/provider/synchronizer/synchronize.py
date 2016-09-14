@@ -12,7 +12,7 @@ logger = logging.getLogger()
 def synchronize(user):
     """
     sychronize function retrieve all the github user's repositories
-    :param user: 
+    :param user:
     """
     try:
         # retrieve user's token
