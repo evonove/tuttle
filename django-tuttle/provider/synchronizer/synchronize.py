@@ -28,33 +28,35 @@ class Synchronize:
         """
         DeployKey.objects.create(**params)
 
-    def delete_deploykeys(self):
+    def delete_deploykeys(self, token):
         """
         Delete Deploykey objects of a specific user
         """
-        DeployKey.objects.filter(repository__user=self.get_user_token().user).delete()
+        DeployKey.objects.filter(repository__user=token.user).delete()
 
-    def get_user_token(self):
+    def run(self):
         """
-        Get the token of a specific user
+        Get all user's token
         """
-        try:
-            return Token.objects.get(user=self.user)
-        except Token.DoesNotExist:
-            raise
+        for token in Token.objects.filter(user=self.user):
+            if token.provider.name == 'Github':
+                g = GithubSyn(self.user, token)
+                g.run()
+            # elif token.provider.name == 'Bitbucket':
 
 
 class GithubSyn(Synchronize):
 
-    def __init__(self, user):
-        Synchronize.__init__(self, user, )
+    def __init__(self, user, token):
+        self.token = token
+        Synchronize.__init__(self, user)
 
     def login(self):
         """
         Login on github and check token's scope
         """
         try:
-            login = Github(self.get_user_token().token)
+            login = Github(self.token.token)
             user = login.get_user()
         except BadCredentialsException:
             raise BadCredentialsException('', '')
@@ -81,7 +83,7 @@ class GithubSyn(Synchronize):
                     'is_private': repo.private,
                     'is_user_admin': repo.permissions.admin,
                     'user': self.user,
-                    'provider': self.get_user_token().provider,
+                    'provider': self.token.provider,
                 }
                 self.create_repository(**params)
 
@@ -97,7 +99,7 @@ class GithubSyn(Synchronize):
                 return key_list, repo_name
 
     def get_deploykey_params(self):
-        self.delete_deploykeys()
+        self.delete_deploykeys(self.token)
         if self.get_deploykey():
             key_list, repo_list = self.get_deploykey()
             for key, repo in zip(key_list, repo_list):

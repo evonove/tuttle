@@ -36,7 +36,7 @@ def test_fetch_repositories_with_organization_field():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -72,7 +72,7 @@ def test_fetch_repositories_with_empty_organization_field():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -118,7 +118,7 @@ def test_fetch_repositories_get_deploykey():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects TuttleUser and Provider
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -168,7 +168,7 @@ def test_fetch_repositories_with_invalid_token():
         githubMock.side_effect = BadCredentialsException(status='', data='')
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -205,7 +205,7 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -250,7 +250,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -295,7 +295,7 @@ def test_fetch_repositories_token_no_scope():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -303,15 +303,3 @@ def test_fetch_repositories_token_no_scope():
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
         with pytest.raises(GithubException):
             call_command('fetch_repositories', '-u', user)
-
-
-@pytest.mark.django_db
-def test_fetch_repositories_token_does_not_exist():
-    """
-    test user's token doesn't exist
-    :return:
-    """
-    user = get_user_model().objects.create(username='username', email='test@test.it')
-    with pytest.raises(Token.DoesNotExist) as ex:
-        call_command('fetch_repositories', '-u', user)
-    assert 'Token matching query does not exist.' in str(ex.value)
