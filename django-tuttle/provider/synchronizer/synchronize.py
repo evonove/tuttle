@@ -2,66 +2,115 @@ import logging
 
 from github import BadCredentialsException
 from github import Github
-from github import GithubException
 
 from provider.models import Token, DeployKey, Repository
 
 logger = logging.getLogger()
 
 
-def synchronize(user):
-    """
-    sychronize function retrieve all the github user's repositories
-    :param user:
-    """
-    try:
-        # retrieve user's token
-        token = Token.objects.get(user=user)
-    except Token.DoesNotExist:
-        raise
+class Synchronize:
 
-    try:
-        # login on github account using user's token
-        logger.info('logging on github')
-        login = Github(token.token)
+    def __init__(self, user):
+        self.user = user
 
-    except BadCredentialsException:
-        logger.error('Invalid credentials')
-        raise BadCredentialsException('', '')
-
-    current_user = login.get_user()
-
-    # check token scopes
-    scope_list = current_user.raw_headers['x-oauth-scopes']
-    if 'repo' not in scope_list:
-        logger.info('no "repo" attribute for the current token')
-        raise GithubException('', '')
-    # delete user's deploy keys
-    DeployKey.objects.filter(repository__user=token.user).delete()
-    # get repository info of the logged user
-    for repo in current_user.get_repos():
-        params = {
-            'name': repo.name,
-            'owner': repo.owner.login,
-            'organization': getattr(repo.organization, 'name', None),
-            'is_private': repo.private,
-            'is_user_admin': repo.permissions.admin,
-            'user': token.user,
-            'provider': token.provider,
-        }
+    def create_repository(self, **params):
+        """
+         Create repository object
+        """
         try:
             Repository.objects.get_or_create(**params)
-
         except Repository.MultipleObjectsReturned:
-            msg = 'More than 1 Repository with this params: %s ' % params
-            logger.error(msg)
             raise
-        # user must be admin of his repository for get the deploy keys
-        if repo.permissions.admin:
-            for key in repo.get_keys():
+
+    def create_deploykey(self, **params):
+        """
+        Create deploykey object
+        """
+        DeployKey.objects.create(**params)
+
+    def delete_deploykeys(self):
+        """
+        Delete Deploykey objects of a specific user
+        """
+        DeployKey.objects.filter(repository__user=self.get_user_token().user).delete()
+
+    def get_user_token(self):
+        """
+        Get the token of a specific user
+        """
+        try:
+            return Token.objects.get(user=self.user)
+        except Token.DoesNotExist:
+            raise
+
+
+class GithubSyn(Synchronize):
+
+    def __init__(self, user):
+        Synchronize.__init__(self, user, )
+
+    def login(self):
+        """
+        Login on github and check token's scope
+        """
+        try:
+            login = Github(self.get_user_token().token)
+            user = login.get_user()
+        except BadCredentialsException:
+            raise BadCredentialsException('', '')
+
+        scope_list = user.raw_headers['x-oauth-scopes']
+        if 'repo' not in scope_list:
+            raise BadCredentialsException('', '')
+        return user
+
+    def get_repo(self):
+        current_user = self.login()
+        repo_list = []
+        for repo in current_user.get_repos():
+            repo_list.append(repo)
+        return repo_list
+
+    def get_repo_params(self):
+        if self.get_repo():
+            for repo in self.get_repo():
+                params = {
+                    'name': repo.name,
+                    'owner': repo.owner.login,
+                    'organization': getattr(repo.organization, 'name', None),
+                    'is_private': repo.private,
+                    'is_user_admin': repo.permissions.admin,
+                    'user': self.user,
+                    'provider': self.get_user_token().provider,
+                }
+                self.create_repository(**params)
+
+    def get_deploykey(self):
+        current_user = self.login()
+        key_list = []
+        repo_name = []
+        for repo in current_user.get_repos():
+            if repo.permissions.admin:
+                for key in repo.get_keys():
+                    key_list.append(key)
+                    repo_name.append(repo.name)
+                return key_list, repo_name
+
+    def get_deploykey_params(self):
+        self.delete_deploykeys()
+        if self.get_deploykey():
+            key_list, repo_list = self.get_deploykey()
+            for key, repo in zip(key_list, repo_list):
                 params = {
                     'title': key.title,
                     'key': key.key,
-                    'repository': Repository.objects.get(name=repo.name),
+                    'repository': Repository.objects.get(name=repo),
                 }
-                DeployKey.objects.create(**params)
+                self.create_deploykey(**params)
+
+    def run(self):
+        self.login()
+        self.get_repo()
+        self.get_deploykey()
+        self.get_repo_params()
+        self.get_deploykey_params()

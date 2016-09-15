@@ -10,7 +10,6 @@ class TestProvider(object):
     """
     Tests for provider model
     """
-
     def test_provider_name(self):
         Provider.objects.create(name='github')
         assert Provider.objects.count() == 1
@@ -26,7 +25,6 @@ class TestRepository(object):
     """
     Tests for repository model
     """
-
     def test_repository_create(self):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',
                                                last_name='surname')
@@ -63,7 +61,6 @@ class TestDeployKey(object):
     """
     Tests for deploykey model
     """
-
     def test_deploykey_create(self):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',
                                                last_name='surname')

@@ -180,6 +180,10 @@ def test_fetch_repositories_with_invalid_token():
 
 @pytest.mark.django_db
 def test_fetch_repositories_organization_multiple_objects_returned():
+    """
+    Test MultipleObjectsException for get_or_create method
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -221,6 +225,10 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_without_organization_multiple_objects_returned():
+    """
+    Test MultipleObjectsException for get_or_create method
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -262,6 +270,10 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_token_no_scope():
+    """
+    Test GithubException with token that doesn't have the 'repo' scope
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
