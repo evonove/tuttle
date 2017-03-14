@@ -2,9 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
-from provider.synchronizer.synchronize import Synchronize
-
 from provider.models import Token
+from provider.synchronizer.synchronize import Synchronize
 
 
 logger = logging.getLogger()

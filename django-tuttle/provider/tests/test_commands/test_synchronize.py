@@ -11,7 +11,6 @@ from github import GithubException
 from github.Repository import Repository as GithubRepo
 
 from provider.models import Provider, Repository, DeployKey, Token
-
 from provider.synchronizer.exceptions import SyncrhonizerException
 
 
