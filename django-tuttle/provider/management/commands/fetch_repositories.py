@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
-from provider.synchronizer.synchronize import GithubSyn
+from provider.synchronizer.synchronize import Synchronize
 
 from provider.models import Token
 
@@ -23,4 +23,4 @@ class Command(BaseCommand):
             token = Token.objects.get(user__username=user_argument)
         except Token.DoesNotExist:
             raise CommandError('User does not have a token key')
-        GithubSyn(token).run()
+        Synchronize(token).run()

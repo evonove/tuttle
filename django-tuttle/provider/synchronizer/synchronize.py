@@ -3,7 +3,7 @@ import logging
 from github import BadCredentialsException
 from github import Github
 
-from provider.models import DeployKey, Repository
+from provider.models import Token, DeployKey, Repository
 
 from .exceptions import SyncrhonizerException
 
@@ -36,6 +36,21 @@ class Synchronize:
         Delete Deploykey objects of a specific user
         """
         DeployKey.objects.filter(repository__user=self.token.user).delete()
+
+    def get_user_tokens(self):
+        """
+        Get all user's token
+        """
+        return Token.objects.filter(token=self.token.token)
+
+    def run(self):
+        """
+        Run the specific syncrhonizer
+        """
+        for token in self.get_user_tokens():
+            if 'Github' in token.provider.name:
+                GithubSyn(self.token).run()
+            # elif 'bitbucket' in token.provider.name
 
 
 class GithubSyn(Synchronize):
