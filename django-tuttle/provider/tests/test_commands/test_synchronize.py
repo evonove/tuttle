@@ -1,13 +1,18 @@
 import pytest
 
+from unittest.mock import MagicMock, patch
+
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError
 from django.core.management import call_command
+
 from github import BadCredentialsException
 from github import GithubException
 from github.Repository import Repository as GithubRepo
+
 from provider.models import Provider, Repository, DeployKey, Token
-from unittest.mock import MagicMock, patch
+
+from provider.synchronizer.exceptions import SyncrhonizerException
 
 
 @pytest.mark.django_db
@@ -156,7 +161,7 @@ def test_fetch_repositories_user_does_not_exist():
     """
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-u', 'test')
-    assert 'User object doesn\'t exist' in str(ex.value)
+    assert 'User does not have a token key' in str(ex.value)
 
 
 @pytest.mark.django_db
@@ -174,7 +179,7 @@ def test_fetch_repositories_with_invalid_token():
         user = get_user_model().objects.create(username='username', email='test@test.it')
         provider = Provider.objects.create(name=provider_arg)
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
-        with pytest.raises(BadCredentialsException):
+        with pytest.raises(SyncrhonizerException):
             call_command('fetch_repositories', '-u', user)
 
 

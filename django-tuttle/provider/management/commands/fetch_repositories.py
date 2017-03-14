@@ -1,9 +1,11 @@
 import logging
 
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from provider.synchronizer.github import synchronize_github
+from provider.synchronizer.synchronize import GithubSyn
+
+from provider.models import Token
+
 
 logger = logging.getLogger()
 
@@ -18,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         user_argument = options['user']
         try:
-            user = get_user_model().objects.get(username=user_argument)
-        except get_user_model().DoesNotExist:
-            raise CommandError('User object doesn\'t exist')
-        synchronize_github(user)
+            token = Token.objects.get(user__username=user_argument)
+        except Token.DoesNotExist:
+            raise CommandError('User does not have a token key')
+        GithubSyn(token).run()

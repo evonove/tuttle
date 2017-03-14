@@ -3,15 +3,18 @@ import logging
 from github import BadCredentialsException
 from github import Github
 
-from provider.models import Token, DeployKey, Repository
+from provider.models import DeployKey, Repository
+
+from .exceptions import SyncrhonizerException
+
 
 logger = logging.getLogger()
 
 
 class Synchronize:
 
-    def __init__(self, user):
-        self.user = user
+    def __init__(self, token):
+        self.token = token
 
     def create_repository(self, **params):
         """
@@ -28,28 +31,17 @@ class Synchronize:
         """
         DeployKey.objects.create(**params)
 
-    def delete_deploykeys(self, token):
+    def delete_deploykeys(self):
         """
         Delete Deploykey objects of a specific user
         """
-        DeployKey.objects.filter(repository__user=token.user).delete()
-
-    def run(self):
-        """
-        Get all user's token
-        """
-        for token in Token.objects.filter(user=self.user):
-            if token.provider.name == 'Github':
-                g = GithubSyn(self.user, token)
-                g.run()
-            # elif token.provider.name == 'Bitbucket':
+        DeployKey.objects.filter(repository__user=self.token.user).delete()
 
 
 class GithubSyn(Synchronize):
 
-    def __init__(self, user, token):
-        self.token = token
-        Synchronize.__init__(self, user)
+    def __init__(self, token):
+        super().__init__(token)
 
     def login(self):
         """
@@ -57,14 +49,14 @@ class GithubSyn(Synchronize):
         """
         try:
             login = Github(self.token.token)
-            user = login.get_user()
+            self._user = login.get_user()
         except BadCredentialsException:
-            raise BadCredentialsException('', '')
+            raise SyncrhonizerException
 
-        scope_list = user.raw_headers['x-oauth-scopes']
+        scope_list = self._user.raw_headers['x-oauth-scopes']
         if 'repo' not in scope_list:
             raise BadCredentialsException('', '')
-        return user
+        return self._user
 
     def get_repo(self):
         current_user = self.login()
@@ -82,7 +74,7 @@ class GithubSyn(Synchronize):
                     'organization': getattr(repo.organization, 'name', None),
                     'is_private': repo.private,
                     'is_user_admin': repo.permissions.admin,
-                    'user': self.user,
+                    'user': self.token.user,
                     'provider': self.token.provider,
                 }
                 self.create_repository(**params)
@@ -99,7 +91,7 @@ class GithubSyn(Synchronize):
                 return key_list, repo_name
 
     def get_deploykey_params(self):
-        self.delete_deploykeys(self.token)
+        self.delete_deploykeys()
         if self.get_deploykey():
             key_list, repo_list = self.get_deploykey()
             for key, repo in zip(key_list, repo_list):
