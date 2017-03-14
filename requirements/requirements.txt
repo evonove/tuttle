@@ -5,51 +5,59 @@
 #    pip-compile --output-file requirements/requirements.txt requirements/requirements.in
 #
 apipkg==1.4               # via execnet
+appdirs==1.4.3            # via setuptools
+appnope==0.1.0            # via ipython
 contextlib2==0.5.4        # via raven
-coverage==4.2
-decorator==4.0.10         # via ipython, traitlets
-dj-database-url==0.4.1
+coverage==4.3.4
+decorator==4.0.11         # via ipython, traitlets
+dj-database-url==0.4.2
 django-getenv==1.3.1
-django-redis==4.4.4
-django==1.10
+django-redis==4.7.0
+django==1.10.6
+ecdsa==0.13               # via python-jose
 execnet==1.4.1            # via pytest-xdist
-flake8==3.0.4
-ipdb==0.10.1
-ipython-genutils==0.1.0   # via traitlets
-ipython==5.1.0            # via ipdb
-mccabe==0.5.2             # via flake8
-newrelic==2.68.0.50
+flake8==3.3.0
+future==0.16.0            # via python-jose
+ipdb==0.10.2
+ipython-genutils==0.2.0   # via traitlets
+ipython==5.3.0            # via ipdb
+mccabe==0.6.1             # via flake8
+newrelic==2.80.1.61
+packaging==16.8           # via setuptools
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
-prompt-toolkit==1.0.7     # via ipython
-psycopg2==2.6.2
+prompt-toolkit==1.0.13    # via ipython
+psycopg2==2.7.1
 ptyprocess==0.5.1         # via pexpect
-py==1.4.31                # via pytest, pytest-xdist
-pycodestyle==2.0.0        # via flake8
-pyflakes==1.2.3           # via flake8
-PyGithub==1.27.1
-pygments==2.1.3           # via ipython
-pytest-base-url==1.1.0    # via pytest-selenium
-pytest-cov==2.3.1
-pytest-django==3.0.0
-pytest-html==1.10.0       # via pytest-selenium
-pytest-selenium==1.3.1
-pytest-variables==1.4     # via pytest-selenium
+py==1.4.32                # via pytest, pytest-xdist
+pycodestyle==2.3.1        # via flake8
+pycrypto==2.6.1           # via python-jose
+pyflakes==1.5.0           # via flake8
+PyGithub==1.32
+pygments==2.2.0           # via ipython
+pyparsing==2.2.0          # via packaging
+pytest-base-url==1.3.0    # via pytest-selenium
+pytest-cov==2.4.0
+pytest-django==3.1.2
+pytest-html==1.14.2       # via pytest-selenium
+pytest-metadata==1.3.0    # via pytest-html
+pytest-selenium==1.9.1
+pytest-variables==1.5.1   # via pytest-selenium
 pytest-xdist==1.15.0
-pytest==3.0.0
+pytest==3.0.6
+python-jose==1.3.2        # via pygithub
 python-logstash==0.4.6
-pytz==2016.6.1
-raven==5.24.3
+pytz==2016.10
+raven==6.0.0
 redis==2.10.5             # via django-redis
-requests==2.11.1          # via pytest-base-url, pytest-selenium
-selenium==2.53.6          # via pytest-selenium
+requests==2.13.0          # via pytest-base-url, pytest-selenium
+selenium==3.3.1           # via pytest-selenium
 simplegeneric==0.8.1      # via ipython
-six==1.10.0               # via prompt-toolkit
-traitlets==4.2.2          # via ipython
-uwsgi==2.0.13.1
+six==1.10.0               # via packaging, prompt-toolkit, python-jose, setuptools, traitlets
+traitlets==4.3.2          # via ipython
+uwsgi==2.0.14
 wcwidth==0.1.7            # via prompt-toolkit
-whitenoise==3.2.1
+whitenoise==3.3.0
 
-# The following packages are commented out because they are
-# considered to be unsafe in a requirements file:
-# setuptools                # via ipdb, ipython
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools                # via ipdb, ipython, pytest

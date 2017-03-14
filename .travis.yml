@@ -18,6 +18,10 @@ before_install:
 
 install:
   - pip install tox
+  - pip install coveralls
 
 script:
   - tox -r
+
+after_script:
+  - coveralls
