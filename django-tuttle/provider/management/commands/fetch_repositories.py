@@ -21,5 +21,5 @@ class Command(BaseCommand):
         try:
             token = Token.objects.get(user__username=user_argument)
         except Token.DoesNotExist:
-            raise CommandError('User does not have a token key')
+            raise CommandError('User does not have a token')
         Synchronize(token).run()

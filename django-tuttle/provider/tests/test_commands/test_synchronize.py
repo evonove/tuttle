@@ -160,7 +160,7 @@ def test_fetch_repositories_user_does_not_exist():
     """
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-u', 'test')
-    assert 'User does not have a token key' in str(ex.value)
+    assert 'User does not have a token' in str(ex.value)
 
 
 @pytest.mark.django_db
