@@ -25,7 +25,7 @@ class Repository(models.Model):
     provider = models.ForeignKey(Provider)
 
     def __str__(self):
-        return self.name
+        return '{}/{}' .format(self.owner, self.name)
 
 
 class DeployKey(models.Model):

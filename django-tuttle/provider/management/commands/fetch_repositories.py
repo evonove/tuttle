@@ -1,8 +1,10 @@
 import logging
 
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
-from provider.synchronizer.synchronize import synchronize
+
+from provider.models import Token
+from provider.synchronizer.synchronize import Synchronize
+
 
 logger = logging.getLogger()
 
@@ -17,7 +19,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         user_argument = options['user']
         try:
-            user = get_user_model().objects.get(username=user_argument)
-        except get_user_model().DoesNotExist:
-            raise CommandError('User object doesn\'t exist')
-        synchronize(user)
+            token = Token.objects.get(user__username=user_argument)
+            logger.info('User: {} has a token' .format(user_argument))
+        except Token.DoesNotExist:
+            logger.error('User: {} does not have a token' .format(user_argument))
+            raise CommandError('User does not have a token')
+        self.stdout.write('Synchronizer is running...')
+        Synchronize(token).run()
+        self.stdout.write('Synchronizer has finished')

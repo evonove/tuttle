@@ -1,13 +1,17 @@
 import pytest
 
+from unittest.mock import MagicMock, patch
+
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError
 from django.core.management import call_command
+
 from github import BadCredentialsException
 from github import GithubException
 from github.Repository import Repository as GithubRepo
+
 from provider.models import Provider, Repository, DeployKey, Token
-from unittest.mock import MagicMock, patch
+from provider.synchronizer.exceptions import SyncrhonizerException
 
 
 @pytest.mark.django_db
@@ -36,7 +40,7 @@ def test_fetch_repositories_with_organization_field():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -72,7 +76,7 @@ def test_fetch_repositories_with_empty_organization_field():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -118,7 +122,7 @@ def test_fetch_repositories_get_deploykey():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects TuttleUser and Provider
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -156,7 +160,7 @@ def test_fetch_repositories_user_does_not_exist():
     """
     with pytest.raises(CommandError) as ex:
         call_command('fetch_repositories', '-u', 'test')
-    assert 'User object doesn\'t exist' in str(ex.value)
+    assert 'User does not have a token' in str(ex.value)
 
 
 @pytest.mark.django_db
@@ -168,18 +172,22 @@ def test_fetch_repositories_with_invalid_token():
         githubMock.side_effect = BadCredentialsException(status='', data='')
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
         provider = Provider.objects.create(name=provider_arg)
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
-        with pytest.raises(BadCredentialsException):
+        with pytest.raises(SyncrhonizerException):
             call_command('fetch_repositories', '-u', user)
 
 
 @pytest.mark.django_db
 def test_fetch_repositories_organization_multiple_objects_returned():
+    """
+    Test MultipleObjectsException for get_or_create method
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -201,7 +209,7 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -221,6 +229,10 @@ def test_fetch_repositories_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_without_organization_multiple_objects_returned():
+    """
+    Test MultipleObjectsException for get_or_create method
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -242,7 +254,7 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of object User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -262,6 +274,10 @@ def test_fetch_repositories_without_organization_multiple_objects_returned():
 
 @pytest.mark.django_db
 def test_fetch_repositories_token_no_scope():
+    """
+    Test GithubException with token that doesn't have the 'repo' scope
+    :return:
+    """
     with patch('provider.synchronizer.synchronize.Github') as githubMock:
         github_user_mock = MagicMock()
         github_repo_mock = MagicMock(GithubRepo)
@@ -283,7 +299,7 @@ def test_fetch_repositories_token_no_scope():
 
         # creation of arguments needed for execute the django command
         token_arg = '123456'
-        provider_arg = 'test'
+        provider_arg = 'Github'
 
         # creation of objects User, Provider, Token
         user = get_user_model().objects.create(username='username', email='test@test.it')
@@ -291,15 +307,3 @@ def test_fetch_repositories_token_no_scope():
         Token.objects.create(title='test', token=token_arg, provider=provider, user=user)
         with pytest.raises(GithubException):
             call_command('fetch_repositories', '-u', user)
-
-
-@pytest.mark.django_db
-def test_fetch_repositories_token_does_not_exist():
-    """
-    test user's token doesn't exist
-    :return:
-    """
-    user = get_user_model().objects.create(username='username', email='test@test.it')
-    with pytest.raises(Token.DoesNotExist) as ex:
-        call_command('fetch_repositories', '-u', user)
-    assert 'Token matching query does not exist.' in str(ex.value)
