@@ -30,10 +30,10 @@ class TestRepository(object):
         user = get_user_model().objects.create(username='user', email='test@test.com', first_name='name',
                                                last_name='surname')
         provider = Provider.objects.create(name='github')
-        repository = Repository.objects.create(name='repository test', owner='user test', organization='organization',
+        repository = Repository.objects.create(name='repository_test', owner='user test', organization='organization',
                                                is_private=True, user=user, provider=provider)
         assert Repository.objects.count() == 1
-        assert str(repository), repository.name
+        assert str(repository), 'user/repository_test'
 
     def test_repository_with_no_user(self):
         with pytest.raises(IntegrityError):
