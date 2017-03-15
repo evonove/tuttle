@@ -71,12 +71,10 @@ class GithubSyn(Synchronize):
         scope_list = self._user.raw_headers['x-oauth-scopes']
         if 'repo' not in scope_list:
             raise BadCredentialsException('', '')
-        return self._user
 
     def get_repo(self):
-        current_user = self.login()
         repo_list = []
-        for repo in current_user.get_repos():
+        for repo in self._user.get_repos():
             repo_list.append(repo)
         return repo_list
 
@@ -95,10 +93,9 @@ class GithubSyn(Synchronize):
                 self.create_repository(**params)
 
     def get_deploykey(self):
-        current_user = self.login()
         key_list = []
         repo_name = []
-        for repo in current_user.get_repos():
+        for repo in self._user.get_repos():
             if repo.permissions.admin:
                 for key in repo.get_keys():
                     key_list.append(key)
